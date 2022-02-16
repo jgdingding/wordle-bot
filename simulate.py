@@ -10,12 +10,15 @@ words = f.readlines()
 
 
 def satisfies_constraint(w, inw, t, exc):
-    for letter in inw:
-        if letter not in w:
-            return False
+    c = w
     for idx, letter in enumerate(t):
         if letter != "_" and w[idx] != letter:
             return False
+        c = c.replace(letter, "", 1)
+    for letter in inw:
+        if letter not in c:
+            return False
+        c = c.replace(letter, "", 1)
     for idx, ex in enumerate(exc):
         for letter in ex:
             if w[idx] == letter:
@@ -101,15 +104,30 @@ def play(initial_guess, answer, verbose=False):
         if result == "g" * 5:
             return i + 1
 
+        matches = {}
+
         for idx, letter in enumerate(result):
             if letter == ".":
-                if guess[idx] not in guess.replace(guess[idx], "", 1):
-                    valids = valids.replace(guess[idx], "")
-            elif letter == "g":
+                valids = valids.replace(guess[idx], "")
+        for idx, letter in enumerate(result):
+            if letter == "g":
                 template[idx] = guess[idx]
-            else:
-                inword += guess[idx]
+                if guess[idx] not in valids:
+                    valids += guess[idx]
+            elif letter == "y":
+                if guess[idx] in matches:
+                    matches[guess[idx]] += 1
+                else:
+                    matches[guess[idx]] = 1
                 excludes[idx] += guess[idx]
+                if guess[idx] not in valids:
+                    valids += guess[idx]
+        for letter in inword:
+            if letter not in matches:
+                inword = inword.replace(letter, "")
+        for let, ct in matches.items():
+            if ct > inword.count(let):
+                inword += let * (ct - inword.count(let))
 
         good_guesses = []
 
