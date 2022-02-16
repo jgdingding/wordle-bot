@@ -2,6 +2,7 @@ import string
 from tqdm import tqdm
 import multiprocessing
 from functools import partial
+from copy import copy
 
 f = open("valid_words.txt", "r")
 commons = open("commons2.txt", "r")
@@ -91,6 +92,7 @@ def get_guess_string(guess, answer):
 
 
 def play(initial_guess, answer, verbose=False):
+    words_copied = copy(words)
     valids = string.ascii_lowercase
     inword = ""
     template = ["_"] * 5
@@ -131,7 +133,7 @@ def play(initial_guess, answer, verbose=False):
 
         good_guesses = []
 
-        for word in words:
+        for word in words_copied:
             word = word.strip().lower()
             if len(word) != 5:
                 continue
@@ -148,6 +150,8 @@ def play(initial_guess, answer, verbose=False):
         if not good_guesses:
             return False
         guess = sorted(good_guesses, key=lambda x: x[1], reverse=True)[0][0]
+
+        words_copied = [x[0] for x in good_guesses]
 
         if verbose:
             print(guess)

@@ -105,7 +105,7 @@ for i in range(6):
         if ct > inword.count(let):
             inword += let * (ct - inword.count(let))
 
-    print(valids, inword, template, excludes)
+    # print(valids, inword, template, excludes)
 
     print("Possible Words: ")
 
@@ -127,6 +127,8 @@ for i in range(6):
     pprint(sorted(good_guesses, key=lambda x: x[1], reverse=True)[:10])
 
     print("\n" * 2 + "*" * 40)
+
+    words = [x[0] for x in good_guesses]
 
 commons.close()
 f.close()
