@@ -37,6 +37,7 @@ The number next to each word suggestion is based on a custom heuristic function.
 `simulator.py` will run 3088 games of Wordle, with the bot choosing the best option according to the heuristic each time.
 Users can tweak their starting word and the heuristic function to try to optimize the bot.
 
-## Other Notes
+## Other Notes and Limitations
 1. Wordlists are not the official Wordle lists, so expect some differences
 1. Bot assumes hard mode (all previous hints must be used in future guesses)
+1. Quality of a guess does not depend on previous guesses or other known information, but rather bot filters out guesses that no longer satisfy the criteria
