@@ -56,6 +56,20 @@ weighted = {
     "j": 0.2,
     "q": 0.2,
 }
+
+freq_table = [{} for _ in range(5)]
+
+for word in words:
+    for idx, letter in enumerate(word.strip()):
+        if letter in freq_table[idx]:
+            freq_table[idx][letter] += 1
+        else:
+            freq_table[idx][letter] = 1
+
+for i in range(5):
+    for k, v in freq_table[i].items():
+        freq_table[i][k] = 100 * v / len(words)
+
 good_words = [w.strip() for w in commons.readlines()]
 
 
@@ -69,10 +83,14 @@ def heuristic(w):
     if w in good_words:
         freq += 15
 
-    if cnt == 4:
-        cnt += 0.1
+    if cnt < 5:
+        cnt += (5 - cnt) * 0.2
 
-    return round(freq * cnt)
+    h2 = 0
+    for ix, l in enumerate(w):
+        h2 += freq_table[ix][l]
+
+    return round(freq * cnt) + round(h2 * 1.1)
 
 
 def get_guess_string(guess, answer):
@@ -100,7 +118,9 @@ def play(initial_guess, answer, verbose=False):
 
     guess = initial_guess
 
-    for i in range(6):
+    guesses = [initial_guess]
+
+    for i in range(5):
         result = get_guess_string(guess, answer)
 
         if result == "g" * 5:
@@ -111,6 +131,7 @@ def play(initial_guess, answer, verbose=False):
         for idx, letter in enumerate(result):
             if letter == ".":
                 valids = valids.replace(guess[idx], "")
+                excludes[idx] += guess[idx]
         for idx, letter in enumerate(result):
             if letter == "g":
                 template[idx] = guess[idx]
@@ -151,11 +172,18 @@ def play(initial_guess, answer, verbose=False):
             return False
         guess = sorted(good_guesses, key=lambda x: x[1], reverse=True)[0][0]
 
+        guesses.append(guess)
+
         words_copied = [x[0] for x in good_guesses]
 
-        if verbose:
-            print(guess)
+    result = get_guess_string(guess, answer)
 
+    if result == "g" * 5:
+        return 6
+
+    if verbose:
+        print(guesses, answer)
+        print(valids, inword, template, excludes)
     return False
 
 
@@ -166,7 +194,7 @@ if __name__ == "__main__":
 
     p = multiprocessing.Pool(8)
 
-    results = tqdm(p.imap(partial(play, "crate"), good_words))
+    results = tqdm(p.imap(partial(play, "crane"), good_words))
 
     for x in results:
         if x != False:

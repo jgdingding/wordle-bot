@@ -4,6 +4,8 @@ from pprint import pprint
 f = open("valid_words.txt", "r")
 commons = open("commons2.txt", "r")
 
+words = f.readlines()
+
 
 def satisfies_constraint(w, inw, t, exc):
     c = w
@@ -51,6 +53,20 @@ weighted = {
     "j": 0.2,
     "q": 0.2,
 }
+
+freq_table = [{} for _ in range(5)]
+
+for word in words:
+    for idx, letter in enumerate(word.strip()):
+        if letter in freq_table[idx]:
+            freq_table[idx][letter] += 1
+        else:
+            freq_table[idx][letter] = 1
+
+for i in range(5):
+    for k, v in freq_table[i].items():
+        freq_table[i][k] = 100 * v / len(words)
+
 good_words = [w.strip() for w in commons.readlines()]
 
 
@@ -63,10 +79,14 @@ def heuristic(w):
     if w in good_words:
         freq += 15
 
-    if count == 4:
-        count += 0.2
+    if count < 5:
+        count += (5 - count) * 0.2
 
-    return round(freq * count)
+    h2 = 0
+    for ix, l in enumerate(w):
+        h2 += freq_table[ix][l]
+
+    return round(freq * count) + round(h2 * 1.1)
 
 
 valids = string.ascii_lowercase
@@ -74,7 +94,6 @@ inword = ""
 template = ["_"] * 5
 excludes = ["", "", "", "", ""]
 
-words = f.readlines()
 
 for i in range(6):
     guess = input("Guess: ")
@@ -85,6 +104,7 @@ for i in range(6):
     for idx, letter in enumerate(result):
         if letter == ".":
             valids = valids.replace(guess[idx], "")
+            excludes[idx] += guess[idx]
     for idx, letter in enumerate(result):
         if letter == "g":
             template[idx] = guess[idx]
